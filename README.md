@@ -16,6 +16,8 @@ Exemplos de execução de Trigger e Classes de Testes
 
 ----------------------------------------------------------------------------LeadBO----------------------------------------------------------------------------------
 
+
+
 public class LeadBO {
     
     public static void tipoEmpresa(List<Lead> leadsTrigger){
@@ -112,6 +114,9 @@ public class LeadBO {
 }
 
 ---------------------------------------------------------------------------TriggerLead---------------------------------------------------------------------------------
+
+
+
 trigger TriggerLead on Lead (before insert, before update, after insert, after update) {
     
     
@@ -142,7 +147,9 @@ trigger TriggerLead on Lead (before insert, before update, after insert, after u
 
 
 ---------------------------------------------------------------------------TriggerLeadTest-----------------------------------------------------------------------------  
- @isTest 
+
+
+@isTest 
 public class TriggerLeadTest {
     @isTest public static void validaTamanhoEmpresaCriarMaior1000(){
         Lead itemLead = new Lead();
