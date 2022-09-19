@@ -14,13 +14,13 @@
 
 Exemplos de execução de Trigger e Classes de Testes
 
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------LeadBO----------------------------------------------------------------------------------
 
-
-
 public class LeadBO {
-    
-    public static void tipoEmpresa(List<Lead> leadsTrigger){
+        public static void tipoEmpresa(List<Lead> leadsTrigger){
         for(Lead itemLead : leadsTrigger){
             if(itemLead.NumberOfEmployees >= 1000){
                 itemLead.TamanhoEmpresa__c = 'Pequena';
