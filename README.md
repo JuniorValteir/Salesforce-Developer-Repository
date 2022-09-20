@@ -10,7 +10,7 @@
 <a href="trailblazer.me/id/jsilva288"><img src="https://trailhead.salesforce.com/assets/trailhead-logo-5d3354441b4d8b97f21075b65e2aea266780d45943bbb36796ac25dc7cf4adc9.svg" width=80px></a>
 
 
-# APEX (Trigger / Class Test)
+# APEX (Trigger / Class Test / SOQL)
 
 Exemplos de execução de Trigger e Classes de Testes
 
