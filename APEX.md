@@ -144,8 +144,8 @@ trigger TriggerLead on Lead (before insert, before update, after insert, after u
     
 }
 
-
----------------------------------------------------------------------------TriggerLeadTest-----------------------------------------------------------------------------  
+```
+# TriggerLeadTest
 
 
 @isTest 
@@ -391,14 +391,5 @@ public class TriggerLeadTest2 {
         }
     }
 }
-```
-
-
-
-# HTML, CSS 
-
-
-
-
 
 
