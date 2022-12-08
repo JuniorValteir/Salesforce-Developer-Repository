@@ -250,6 +250,8 @@ public class TriggerLeadTest {
             System.assert(itemTask.Subject == '!! Verificar se o cadastro está completo associado ao Lead !!' );
     }
 }
+
+
 @isTest
 public class TriggerLeadTest2 {
     
