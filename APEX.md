@@ -395,9 +395,9 @@ public class TriggerLeadTest2 {
 
 
 
-# HTML, CSS, JAVASCRIPT. 
+# HTML, CSS 
 
-Mini Projeto Inicial Criação Site tema Tatuagem 
+
 
 
 
