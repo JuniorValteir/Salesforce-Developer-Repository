@@ -42,8 +42,8 @@
     </lightning-card>
   </template>
   
-  ```
-  ------------------------------------------------------------------------------consultaCEP.js---------------------------------------------------------------------------
+```
+  ------------------------------------------------------------------------------consultaCEP.js-------------------------------------------------------------------------
 import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 const urlViacep = 'https://viacep.com.br/ws/';
@@ -102,8 +102,9 @@ export default class ConsultaCEP extends LightningElement {
                 this.dispatchEvent(erro);
             })
     }
-    ```
-  ------------------------------------------------------------------------------consultaCEP.meta---------------------------------------------------------------------------
+    
+```
+  ------------------------------------------------------------------------------consultaCEP.meta-----------------------------------------------------------------------
   <?xml version="1.0" encoding="UTF-8"?>
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>47.0</apiVersion>
@@ -116,7 +117,7 @@ export default class ConsultaCEP extends LightningElement {
 </LightningComponentBundle>
 
  ```
-  --------------------------------------------------------------------------Informações Config Org---------------------------------------------------------------------------
+  --------------------------------------------------------------------------Informações Config Org---------------------------------------------------------------------
   
 Em configurações, procure por Configuração de Sites Remotos(Remote Site Settings) e clique em Novo Site Remoto Confiavel(New Remote Site)
 Crie um novo site remoto com a URL desejavel. Neste caso foi usada a do site ViaCep https://viacep.com.br
