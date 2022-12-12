@@ -108,7 +108,7 @@ export default class ConsultaCEP extends LightningElement {
     
 ```
 
-
+```
 -----------------------------------------------------------------consultaCEP.meta--------------------------------------------------------------------------------------
 
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -122,7 +122,7 @@ export default class ConsultaCEP extends LightningElement {
 </LightningComponentBundle>
 ```
 
-
+```
 -----------------------------------------------------------------Informações Org--------------------------------------------------------------------------------------
 
 Em configurações, procure por Configuração de Sites Remotos(Remote Site Settings) e clique em Novo Site Remoto Confiavel(New Remote Site)
