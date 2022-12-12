@@ -14,7 +14,7 @@
 # LWC  Consulta CEP API ViaCEP
 
 ```
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 -----------------------------------------------------------------consultaCEP.html--------------------------------------------------------------------------------------
 <template>
@@ -43,6 +43,7 @@
   </template>
   
 ```
+
   ------------------------------------------------------------------------------consultaCEP.js-------------------------------------------------------------------------
 import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -116,7 +117,7 @@ export default class ConsultaCEP extends LightningElement {
     </targets>
 </LightningComponentBundle>
 
- ```
+```
   --------------------------------------------------------------------------Informações Config Org---------------------------------------------------------------------
   
 Em configurações, procure por Configuração de Sites Remotos(Remote Site Settings) e clique em Novo Site Remoto Confiavel(New Remote Site)
