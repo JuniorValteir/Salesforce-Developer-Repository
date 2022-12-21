@@ -16,7 +16,7 @@ Exemplos de execução de Trigger e Classes de Testes
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ```
-------------------------------------------------------------------------AccountBO--------------------------------------------------------------------------------------
+------------------------------------------------------------------------LeadBO--------------------------------------------------------------------------------------
 
 public class LeadBO {
         public static void tipoEmpresa(List<Lead> leadsTrigger){
@@ -107,6 +107,20 @@ public class LeadBO {
             }
         }
        
+    }
+    #Using MAP
+    public static void changeDescription (List<Lead>lstLead, Map<id,Lead> mapLeadNew, Map<Id, Lead> mapLeadOld){
+        
+        
+        for(Lead itemLead : lstLead){
+            String newValue = mapLeadNew.get(itemLead.Id).Rating;
+            String oldValue = mapLeadOld.get(itemLead.Id).Rating;
+            
+            System.debug(newValue);     
+            System.debug(oldValue); 
+            itemLead.Description = oldValue;
+            
+        }
     }
     
     
