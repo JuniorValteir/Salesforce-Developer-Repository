@@ -1,5 +1,5 @@
 
-# GET/POST 
+# GET METHOD
 ```
 
 
