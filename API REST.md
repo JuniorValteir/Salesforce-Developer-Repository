@@ -2,7 +2,12 @@
 # GET METHOD
 ```
 
-@RestResource(urlMapping='/testRestApi/Leads/*')
+@RestResource(urlMapping='/testRestApi/Leads/*') // usando no aplicativo ARC do Chrome
+
+VisualForce
+<apex:page >
+    {!$Api.Session_ID} // buscando o API da Org/Developer para usar no Request URl do aplicativo
+</apex:page>
 
 global with sharing class LeadApi {
    
@@ -21,3 +26,57 @@ global with sharing class LeadApi {
         resultRest.statusCode = 200;
     }
 }
+
+# POST METHOD
+
+```
+global with sharing class LeadInsertWrapper { 
+
+    public string nome;
+    public string sobrenome;
+    public string nome_empresa;
+    public string status_doLead;
+    public string email;
+    
+}
+
+@HttpPost
+    global static void insertLead(List<LeadInsertWrapper> lstLead){
+        
+        RestResponse resultRest = RestContext.response;
+        
+        List<Lead> lstLeadInsert = new List<Lead>();
+        
+        for(LeadInsertWrapper itemLead : lstLead){
+            Lead inserLead = new Lead(
+                FirstName = itemLead.nome,
+                LastName = itemLead.sobrenome,
+                Company = itemLead.nome_empresa,
+                Status = itemLead.status_doLead,
+                Email = itemLead.email
+            );
+            lstLeadInsert.add(inserLead);
+        }
+        
+        List<String> idsResponse = new List<String>();
+        
+            if(lstLeadInsert.size() > 0){ // verifica conteudo da lista 
+                Database.UpsertResult[] results = Database.upsert(lstLeadInsert); // traz o valores/resultados das ações e verifica se há erro
+                
+                List<String> lstError = new List<String>();
+                for(Integer index = 0, size = results.size(); index < size; index++){
+                    if(results[index].isSuccess()){ 
+                        idsResponse.add(results[index].Id); // salva o id do index que teve sucesso
+                    }else{
+                        idsResponse.add('Erro ao inserir ou atualizar um registro');
+                    }
+                }
+            }
+            
+        resultRest.responseBody = Blob.valueof(JSON.serializePretty(idsResponse));
+        resultRest.statusCode = 200;
+        
+}
+
+
+
