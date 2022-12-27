@@ -2,7 +2,6 @@
 # GET METHOD
 ```
 
-
 @RestResource(urlMapping='/testRestApi/Leads/*')
 
 global with sharing class LeadApi {
