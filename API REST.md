@@ -30,7 +30,18 @@ global with sharing class LeadApi {
 
 # POST METHOD
 ```
+global with sharing class LeadInsertWrapper {
 
+    public string nome;
+    public string sobrenome;
+    public string nome_empresa;
+    public string status_doLead;
+    public string email;
+    
+    public LeadInsertWrapper() {
+
+    }
+}
 
 @HttpPost
     global static void insertLead(List<LeadInsertWrapper> lstLead)
