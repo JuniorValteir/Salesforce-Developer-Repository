@@ -1,7 +1,7 @@
 
 # GET METHOD
 ```
-@RestResource(urlMapping='/SalesforceGetTest/*')
+@RestResource(urlMapping='/SalesforceGetTest/*') // usando WorkBench
 
 global class RestEndpoint {
 	
@@ -43,7 +43,7 @@ global with sharing class LeadApi {
 
 # POST METHOD
 ```
-global with sharing class LeadInsertWrapper {
+global with sharing class LeadInsertWrapper {  // usando WorkBench
 
     public string nome;
     public string sobrenome;
@@ -55,9 +55,39 @@ global with sharing class LeadInsertWrapper {
 
     }
 }
+@HttpPost
+    global static WrapperAccount insertAccountDetails(String Name, Integer NumberOfEmployees){
+        
+        Account itemAcc = new Account();
+        itemAcc.Name = Name;
+        itemAcc.NumberOfEmployees = NumberOfEmployees;   
+        insert itemAcc;
+        
+        WrapperAccount itemWrap = new WrapperAccount();
+        itemWrap.Nome = itemAcc.Name;
+        itemWrap.NumerodeEmpregados = itemAcc.NumberOfEmployees;
+        itemWrap.AccountId = itemAcc.Id;
+        
+        
+        
+        return itemWrap;  
+        
+    }
+    global class WrapperAccount{
+        global string Nome {get;set;}
+        global Integer NumerodeEmpregados {get;set;}
+        global string AccountId  {get;set;}
+        
+        global WrapperAccount(){
+            this.Nome = null;
+            this.NumerodeEmpregados = null;
+            this.AccountId = null;
+        }        
+    }
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @HttpPost
-    global static void insertLead(List<LeadInsertWrapper> lstLead)
+    global static void insertLead(List<LeadInsertWrapper> lstLead) // usando no aplicativo ARC do Chrome
     {
         RestResponse resultRest = RestContext.response;
         
