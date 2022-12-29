@@ -1,6 +1,19 @@
 
 # GET METHOD
 ```
+@RestResource(urlMapping='/SalesforceGetTest/*')
+
+global class RestEndpoint {
+	
+    @HttpGet
+    global static Account getHighNumbEmploy(){
+        
+        Account itemOcc = [SELECT Id, Name, NumberOfEmployees FROM Account ORDER BY NumberOfEmployees DESC NULLS LAST LIMIT 1 ];
+        return itemOcc;
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @RestResource(urlMapping='/testRestApi/Leads/*') // usando no aplicativo ARC do Chrome
 
