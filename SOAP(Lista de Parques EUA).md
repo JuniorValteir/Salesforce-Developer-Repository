@@ -57,8 +57,9 @@
   </wsdl:service>
 </wsdl:definitions>
 ```
-```
 # ParkService Class
+```
+
 
 public class ParkLocator {
 		public static String[] country (string theCountry){
@@ -68,8 +69,9 @@ public class ParkLocator {
 }
 ```
 
-```
 # ParkServicerMock
+```
+
 
 @isTest
 global class ParkServiceMock implements WebServiceMock{
@@ -90,8 +92,9 @@ global class ParkServiceMock implements WebServiceMock{
 }
 
 ```
-```
 # ParkServiceTest
+```
+
 @isTest
 private class ParkLocatorTest {
     @isTest static void testCallout(){
