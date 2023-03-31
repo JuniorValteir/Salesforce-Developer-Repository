@@ -1,5 +1,52 @@
 # Salesforce-Developer-Repository
 
+## The method does not allow the stages of the StageName field to return
+```
+public class OpportunityBO {
+    
+    public static void cannotReturn (List <Opportunity> lstOppNew, Map <Id, Opportunity> mapOppOld){
+        
+        // Usando um objeto de descrição de campo e atribuindo os dados do campo StageName;
+        Schema.DescribeFieldResult fieldResult = Opportunity.StageName.getDescribe();
+        List<Schema.PicklistEntry> values = fieldResult.getPicklistValues(); // Lista de valores de entrada;
+        List <String> lstValues = new List <String> (); // Adicionando valores a uma lista de Strings;
+        for(Schema.PicklistEntry Counter: values){
+            lstValues.add(Counter.getLabel());
+        } 
+        
+        for (Opportunity Counter: lstOppNew){
+            String NewStage = Counter.StageName;
+            String OldStage = mapOppOld.get(Counter.id).StageName;
+            Boolean NewStop = false;
+            Boolean OldStop = false;
+            Integer indexNew = 0;
+            Integer indexOld = 0;
+            
+            Do{ // Localizando index da opção da Trigger.New;
+                String lstCounter = lstValues[indexNew];
+                if (NewStage == lstCounter){
+                    NewStop = true;
+                }else{
+                    indexNew++;
+                }
+            }while(NewStop == false); 
+            
+            Do{ // Localizando index da opção da Trigger.OldMap;
+                String lstCounter = lstValues[indexOld];
+                if (OldStage == lstCounter){
+                    OldStop = true;
+                }else{
+                    indexOld++; 
+                }
+            }while(OldStop == false); 
+            
+            if(indexNew < indexOld){ // Comparando os index;
+                Counter.StageName.addError('A fase não pode retornar!');
+            }
+        }
+    }   
+    
+```
 
 ## Creating an Account and linking a values from Lead. 
 ```
