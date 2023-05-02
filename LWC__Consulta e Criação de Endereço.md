@@ -47,53 +47,99 @@
 
 -----------------------------------------------------------------consultaCEP.js----------------------------------------------------------------------------------------
   
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import Enderecos__c from '@salesforce/schema/Enderecos__c';
+import Cep__c from '@salesforce/schema/Enderecos__c.Cep__c';
+import Account__c from '@salesforce/schema/Enderecos__c.Account__c';
+import Rua__c from '@salesforce/schema/Enderecos__c.Rua__c';
+import Bairro__c from '@salesforce/schema/Enderecos__c.Bairro__c';
+import DDD__c from '@salesforce/schema/Enderecos__c.DDD__C';
+import Cidade__c from '@salesforce/schema/Enderecos__c.Cidade__c';
+import Estado__c from '@salesforce/schema/Enderecos__c.Estado__c';
+import Numero__c from '@salesforce/schema/Enderecos__c.Numero__c';
+import { createRecord } from 'lightning/uiRecordApi';
 const urlViacep = 'https://viacep.com.br/ws/';
 
 export default class ConsultaCEP extends LightningElement {
-
-   
+    @api recordId;
     @track cep;
     @track rua;
     @track bairro;
     @track cidade;
-    @track uf;
+    @track estado;
+    @track ddd;
+    @track numero;
     @track showResult = true;
 
     
+    endereco = {
+        cep:"",
+        rua: "",
+        bairro: "",
+        numero: "",
+        cidade: "",
+        estado: "",
+        ddd: "",
+        account:"",
+        
+    };
 
-    handleChangeCEP(event) {    
+    
+    
+    handleChangeCEP(event) {
         this.cep = event.target.value;
+        
+          
+        let name_ = event.target.name;
+        let value_ = event.target.value;
+        
+        this.endereco = {...this.endereco, [name_]:value_};
+        
+    }
+    handleChangeNumero(event) {
+                
+          
+        let name_ = event.target.name;
+        let value_ = event.target.value;
+        
+        this.endereco = {...this.endereco, [name_]:value_};
+        
     }
 
     handleClickCEP(event) {
 
               
         this.showResult = false;
-        fetch(urlViacep + this.cep + '/json/', // (Promise). Getting the urlViacep and concatenate with CEP that the user input, with the format json
+        fetch(urlViacep + this.cep+'/json/', // End point URL
             {
                 
             })
             .then((response) => {
-                return response.json(); // returning the response in the form of JSON after the return of API data
+                return response.json(); // returning the response in the form of JSON
             })
             .then((jsonResponse) => {
 
                 let responseObj = jsonResponse;
 
                 this.cep = responseObj['cep'];
+                this.endereco.cep = this.cep;
                 this.rua = responseObj['logradouro'];
+                this.endereco.rua = this.rua;
                 this.bairro = responseObj['bairro'];
+                this.endereco.bairro = this.bairro;
                 this.cidade = responseObj['localidade'];
-                this.uf = responseObj['uf'];
-
+                this.endereco.cidade = this.cidade;
+                this.estado = responseObj['uf'];
+                this.endereco.estado = this.estado;
+                this.ddd = responseObj['ddd'];
+                this.endereco.ddd = this.ddd;
                 
             })
             .catch(
                 error => {
-                    
-                window.console.log('!! 🚨 CPF INVALIDO !!' + JSON.stringify(error));
+                console.log()    
+                window.console.log('callout error ===> ' + JSON.stringify(error));
                 const erro = new ShowToastEvent({
                     title:'Erro',
                     message: '!! 🚨 CPF INVALIDO !!', 
@@ -105,6 +151,48 @@ export default class ConsultaCEP extends LightningElement {
                 this.dispatchEvent(erro);
             })
     }
+   
+    createEndereco(){
+        this.endereco.account = this.recordId;
+        const fields = {};
+
+        fields[Account__c.fieldApiName] = this.endereco.account;
+        fields[Cep__c.fieldApiName] = this.endereco.cep;
+        fields[Rua__c.fieldApiName] = this.endereco.rua;
+        fields[Bairro__c.fieldApiName] = this.endereco.bairro;
+        fields[DDD__c.fieldApiName] = this.endereco.ddd;
+        fields[Numero__c.fieldApiName] = this.endereco.numero;
+        fields[Cidade__c.fieldApiName] = this.endereco.cidade;
+        fields[Estado__c.fieldApiName] = this.endereco.estado;
+        
+        const recordInput = {apiName: Enderecos__c.objectApiName, fields};
+        createRecord(recordInput).then(
+            (event)=>{
+                const confirm = new ShowToastEvent({
+                    title:'Endereço Criado',
+                    message: 'ID do Endereço: ' + event.id,
+                    variant: 'success'
+                });
+
+                
+                //dispara o envento da mensagem após a conclusão da promessa
+                this.dispatchEvent(confirm);
+            }
+        ).catch(
+            (error)=>{
+                const erro = new ShowToastEvent({
+                    title:'Erro',
+                    message: error.body.message, 
+                    variant: 'error'
+                });
+
+
+                //dispara o evento da mensagem após a conclusão da promessa
+                this.dispatchEvent(erro);
+            }
+        )
+    }
+}
     
 ```
 
