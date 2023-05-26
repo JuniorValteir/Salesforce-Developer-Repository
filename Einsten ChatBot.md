@@ -38,3 +38,9 @@ public class B2BBotRequest {
 }
 // Invoque a List<String> varible with InvableVariable notation to use on B2BBotBO Apex class;
 ```
+##### Observations
+```
+-- Remember to change the type of Einstein Bot to some avaiable user that can access datas from organization. Recommended that you create a Custom Bot. 
+-- To call an API on outputs bot, use {!ApiName}
+
+```
