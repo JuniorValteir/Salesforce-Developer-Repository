@@ -6,16 +6,16 @@
 ```
 public class B2BBotBO {
     @InvocableMethod(label='getStatusPedido')
-    public static List<Result> getStatusPedido(List<Request> numPedido) {
+    public static List<B2BBotResult> getStatusPedido(List<B2BBotRequest> numPedido) {
                                        
-        List<Result> retorno = new List<Result>();
+        List<B2BBotResult> retorno = new List<B2BBotResult>();
         
         string idPedido = numPedido[0].numeroPedido;
         
         Order pedido = [SELECT IdSF__c, toLabel(MotivoBloqueio__c) FROM Order WHERE IdSF__c = :idPedido LIMIT 1];
         
         if(pedido != null) {                
-            Result pedidoRetorno = new Result();        
+            B2BBotResult pedidoRetorno = new B2BBotResult();        
             pedidoRetorno.statusPedido = pedido.MotivoBloqueio__c;                        
             retorno.add(pedidoRetorno);
         }
