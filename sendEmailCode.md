@@ -1,7 +1,7 @@
 
 <img src="https://media-exp1.licdn.com/dms/image/C4D16AQFBe5q0Rr5OEg/profile-displaybackgroundimage-shrink_200_800/0/1603929596357?e=2147483647&v=beta&t=vHuFpes5cNqUMmIOi7QNzgtuR0fdnM-TaY3e6UVeJYQ">
 
-👨‍💻 Hoje estou estudando Desenvolvimento Salesforce. APEX / SOQL / LWC.
+👨‍💻 Hoje sou Analista de Desenvolvimento em Salesforce.
 
   <a href="https://www.instagram.com/valteir.jr/" target="_blank"><img src="https://img.shields.io/badge/-Instagram-%23E4405F?style=for-the-badge&logo=instagram&logoColor=white" target="_blank"></a>
 
