@@ -19,32 +19,25 @@
 public class B2BBotBO {
     @InvocableMethod(label='getStatusPedido')
     public static List<B2BBotResult> getStatusPedido(List<B2BBotRequest> numPedidoList) { // método recebe como parametro uma variável do tipo da classe B2BBOTRequest que recebe
-        // a anotação @InvocableVariable que permite o BOT Maria o envio de valores. 
+        // The @InvocableVariable annotation that allows the BOT to send values.
         
-        // O retorno do método é do tipo B2BBotResult que recebe a anotação @InvocableVariable que
-        // permite o envio de valores ao BOT Maria. 
+       	// The method return is of type B2BBotResult which receives the @InvocableVariable annotation that
+        // allows you to send values to the BOT 
         
-        List<B2BBotResult> retornoList = new List<B2BBotResult>(); // Instância de um objeto de tipo B2BBOTResult que traz os atribuitos que recebem a anotação @InvocableVariable. 
+        List<B2BBotResult> retornoList = new List<B2BBotResult>(); // Instance of an object of type B2BBOTResult that carries the attributes that receive the @InvocableVariable annotation.
         
-        string idPedido = numPedidoList[0].numeroPedido; // Cria variavel idPedido que recebe os valores do INDEX '0' da Lista numPedido.
+        string idPedido = numPedidoList[0].numeroPedido; // Create an idRequest variable that receives the values of INDEX '0' from the numRequest list.
         
-        Order pedido = [SELECT IdSF__c, toLabel(MotivoBloqueio__c) FROM Order WHERE IdSF__c = :idPedido LIMIT 1]; // consulta que traz a LABEL do campo 'MotivoBloqueio__c'
-        // com a função toLabel, pois o retorno da mesma seria o
-        // valor de Api. 
+        Order pedido = [SELECT IdSF__c, toLabel(MotivoBloqueio__c) FROM Order WHERE IdSF__c = :idPedido LIMIT 1]; // Query that return a BlockingReason__c label field using the 'toLabel' funccion 
+														  // because her return will be an Api value.
         
         if(pedido != null) {                
             B2BBotResult pedidoRetorno = new B2BBotResult();        
-            pedidoRetorno.statusPedido = pedido.MotivoBloqueio__c; // A variável de atributo da classe B2BBotResult recebe o valor da LABEL de MotivoBloqueio__c 
-            // feito pela consulta 'pedido'.
-            
+            pedidoRetorno.statusPedido = pedido.MotivoBloqueio__c; // The attribute variable of class B2BBotResult receives the value of the LABEL of ReasonBlock__c made by the query 'order'.
+    
             retornoList .add(pedidoRetorno); // Adiciona o valor à lista o valor do objeto pedidoRetorno.
-            
-            
         }
-        return retornoList ; // Retorna um valor de tipo Lista B2BBotResult que pode ser invocado pelo BOT Maria.
-        
-        
-        
+        return retornoList ; // Returns a value of type List B2BBotResult that can be invoked by the BOT
     }
 }
 ```
@@ -54,7 +47,7 @@ public class B2BBotResult {
     @InvocableVariable(label='Records for Output' description='yourDescription' required=true)
     public String statusPedido;
 }
-// Invoque a List<String> varible with InvableVariable notation to use on B2BBotBO Apex class;
+// Invoque a String variable with InvableVariable notation to use on B2BBotBO Apex class;
 ```
 ### Request Apex Class(@InvocableVariable)
 ```
@@ -62,7 +55,7 @@ public class B2BBotRequest {
 	@InvocableVariable(label='Records for Input' description='yourDescription' required=true)
     public String numeroPedido;
 }
-// Invoque a List<String> varible with InvableVariable notation to use on B2BBotBO Apex class;
+// Invoque a String variable with InvableVariable notation to use on B2BBotBO Apex class;
 ```
 ### ApexTest
 
