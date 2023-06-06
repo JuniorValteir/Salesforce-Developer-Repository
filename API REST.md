@@ -23,7 +23,8 @@ global class RestEndpoint {
     }
 }
 
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+```
+```
 
 @RestResource(urlMapping='/testRestApi/Leads/*') // usando no aplicativo ARC do Chrome
 
@@ -48,6 +49,108 @@ global with sharing class LeadApi {
         resultRest.responseBody = Blob.valueof(JSON.serializePretty(lstLead));
         resultRest.statusCode = 200;
     }
+
+```
+```
+public with sharing class getLinkComprovei {
+    public static void criaLinkRastreamentoComprovei(List<Order> triggerListOrder){
+        
+        List<Id> lstId = new List<Id>();
+        Exception exceptionThrown;
+        try{
+            for(Order itemOrder : triggerListOrder){
+
+            		lstId.add(itemOrder.Id);
+            }
+            Order order = [SELECT Id, Status, ChaveComprovei__c, LinkRastreamentoPedido__c 
+            	           FROM Order 
+            	           WHERE Id=:lstId];
+            
+            String endPoint = 'https://api.comprovei.com.br/api/1.1/documents/getStatus?key='+order.ChaveComprovei__c;
+            System.debug(endPoint);
+            String username = 'userInfo';
+            String password = 'password';
+            String authHeader = 'Basic ' + EncodingUtil.base64Encode(Blob.valueOf(username + ':' + password));
+            
+            Http http = new Http();
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint(endPoint);
+            request.setMethod('GET');
+            request.setTimeout(120000);
+            request.setHeader('Authorization', authHeader);
+            HttpResponse response = http.send(request);
+            System.debug(response.getBody());
+            
+            System.debug(response.getStatusCode());
+            
+            if ((response.getStatusCode() == 200) || (response.getStatusCode() == 201) || (response.getStatusCode() == 202) || (response.getStatusCode() == 203) || (response.getStatusCode() == 204) || 				(response.getStatusCode() == 205) || (response.getStatusCode() == 206)) {
+                String responseBody = response.getBody();
+                ComproveiTO comprovei = (ComproveiTO)JSON.deserialize(responseBody, ComproveiTO.class);
+                String linkTracking = comprovei.response_data[0].Documento.LinkTracking;
+                order.LinkRastreamentoPedido__c = linkTracking;
+            }
+        }catch(Exception ex){
+            exceptionThrown = ex;
+            System.debug(ex);            
+        }
+        
+    }     
+}
+
+--------------------------------------------------------------------------------------------\\----------------------------------------------------------------------------------------------------------------------
+public class ComproveiTO {
+    
+    
+    public String user_message;
+    public String internal_message;
+    public List<Response_data> response_data;
+    public Integer code;
+    public String more_info;
+    
+    public class Pedidos {
+    }
+    
+    public class Response_data {
+        public Documento Documento;
+    }
+    public class Itens {
+        public String Codigo;
+        public String Descricao;
+        public String Quantidade;
+    }
+    
+    
+    public class Documento {
+        public String NumeroNF;
+        public String NumeroPedido;
+        public String Nome;
+        public String Logradouro;
+        public String Bairro;
+        public String Cidade;
+        public String Estado;
+        public String Latitude;
+        public String Longitude;
+        public String NomeTransportadora;
+        public String CnpjTransportadora;
+        public String PrazoSLA;
+        public String SLADiasUteis;
+        public String DataHora;
+        public String Foto;
+        public String PrevisaoEntrega;
+        public String CodigoStatus;
+        public String Status;
+        public String DescricaoStatus;
+        public String CodOcorrencia;
+        public String DescricaoOcorrencia;
+        public String Rota;
+        public String DataRota;
+        public String Motorista;
+        public String Placa;
+        public List<Itens> Itens;
+        public List<Pedidos> Pedidos;
+        public String LinkTracking;
+    }
+}
 
 ```
 
