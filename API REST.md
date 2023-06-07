@@ -53,42 +53,53 @@ global with sharing class LeadApi {
 ```
 ```
 public with sharing class getLinkComprovei {
-    public static void criaLinkRastreamentoComprovei(List<Order> triggerListOrder){
+    public static void RastreamentoComprovei(List<Order> triggerListOrder){
         
-        List<Id> lstId = new List<Id>();
+        Set<Id> setId = new Set<Id>();
+        List<String> lstRetornoPedido = new List<String>(); // Lista de retorno do registro do Pedido. 
         Exception exceptionThrown;
+        
+        for(Order itemOrder : triggerListOrder){
+            
+            setId.add(itemOrder.Id); // Adiciona ao Set o Id do Registro
+            lstRetornoPedido.add(0, itemOrder.RecordType.Name); // Adiciona a posição '0' da Lista o Nome do Tipo de Registro
+            lstRetornoPedido.add(1, itemOrder.ChaveComprovei__c); // Adiona a posição '1' da Lista o valor da Chave do Comprovei
+ 
+        }
         try{
-            for(Order itemOrder : triggerListOrder){
+            if(lstRetornoPedido[1]  != Null & lstRetornoPedido[0] == 'Pedido Mercado Interno'){ // Valida se há um valor no campo ChaveComrprovei__c 
+																								// e se o tipo de registro é Mercado Interno
+                Order order = [SELECT Id, Status, ChaveComprovei__c, LinkRastreamentoPedido__c 
+                               FROM Order 
+                               WHERE Id=:setId]; // Traz os valores dos campos compativeis ao ID 
+                
+                String endPoint = 'https://api.comprovei.com.br/api/1.1/documents/getStatus?key='+order.ChaveComprovei__c;// Contrução URL COMPROVEI para Metodo GET, com valor do campo ChaveComrpovei__c
+                System.debug(endPoint);
+                String username = 'userName'; // Usuário e Senhas necessários para acesso dos dados via Metodo 'GET'
+                String password = 'password';
+                String authHeader = 'Basic ' + EncodingUtil.base64Encode(Blob.valueOf(username + ':' + password)); // Construção do Header de chamada de Usuário e Senha
+                
+                Http http = new Http();
+                HttpRequest request = new HttpRequest();
+                request.setEndpoint(endPoint); // Set valor URL da requisição
+                request.setMethod('GET'); // Tipo Método da requisição
+                request.setTimeout(120000); // Tempo limite de requsição
+                request.setHeader('Authorization', authHeader); // Set Header(user:password) Authorization à requisição
+                HttpResponse response = http.send(request);
+                System.debug(response.getBody());
+                
+                System.debug(response.getStatusCode());
+                
+                if ((response.getStatusCode() == 200) || (response.getStatusCode() == 201) || (response.getStatusCode() == 202) || (response.getStatusCode() == 203) || (response.getStatusCode() == 204) || 				    (response.getStatusCode() == 205) || (response.getStatusCode() == 206)) {
 
-            		lstId.add(itemOrder.Id);
+                    String responseBody = response.getBody(); // Atribuição do valor do corpo do JSON a variável responseBody
+                    ComproveiTO comprovei = (ComproveiTO)JSON.deserialize(responseBody, ComproveiTO.class); // Deserializa o JSON de responseBody em um Objeto da Classe ComproveiTO.
+                    order.LinkRastreamentoPedido__c = comprovei.response_data[0].Documento.LinkTracking; // Atribuição do valor adquirido do campo LinkTracking proveniênte do JSON do Comprovei. 
+                    System.debug(order.LinkRastreamentoPedido__c);
+ 
+                }
             }
-            Order order = [SELECT Id, Status, ChaveComprovei__c, LinkRastreamentoPedido__c 
-            	           FROM Order 
-            	           WHERE Id=:lstId];
             
-            String endPoint = 'https://api.comprovei.com.br/api/1.1/documents/getStatus?key='+order.ChaveComprovei__c;
-            System.debug(endPoint);
-            String username = 'userInfo';
-            String password = 'password';
-            String authHeader = 'Basic ' + EncodingUtil.base64Encode(Blob.valueOf(username + ':' + password));
-            
-            Http http = new Http();
-            HttpRequest request = new HttpRequest();
-            request.setEndpoint(endPoint);
-            request.setMethod('GET');
-            request.setTimeout(120000);
-            request.setHeader('Authorization', authHeader);
-            HttpResponse response = http.send(request);
-            System.debug(response.getBody());
-            
-            System.debug(response.getStatusCode());
-            
-            if ((response.getStatusCode() == 200) || (response.getStatusCode() == 201) || (response.getStatusCode() == 202) || (response.getStatusCode() == 203) || (response.getStatusCode() == 204) || 				(response.getStatusCode() == 205) || (response.getStatusCode() == 206)) {
-                String responseBody = response.getBody();
-                ComproveiTO comprovei = (ComproveiTO)JSON.deserialize(responseBody, ComproveiTO.class);
-                String linkTracking = comprovei.response_data[0].Documento.LinkTracking;
-                order.LinkRastreamentoPedido__c = linkTracking;
-            }
         }catch(Exception ex){
             exceptionThrown = ex;
             System.debug(ex);            
