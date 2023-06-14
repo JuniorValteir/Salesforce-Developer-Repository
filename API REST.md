@@ -57,39 +57,46 @@ public with sharing class GetLinkComproveiBO {
     @InvocableMethod(label='getLinkComprovei')
     public static List<GetLinkComproveiResult> criaLinkRastreamentoComprovei(List<GetLinkComproveiRequest> numPedidoList){ 
         
+        // Lista que retornará a URL de rastreamento do Comprovei.
+        List<GetLinkComproveiResult> retornoList = new List<GetLinkComproveiResult>(); 
         
-        List<GetLinkComproveiResult> retornoList = new List<GetLinkComproveiResult>(); // Lista que retornará a URL de rastreamento do Comprovei.
-        
-                
+        // Retorna tipo Org
         Organization org = [SELECT Id, IsSandbox FROM Organization LIMIT 1];
         Boolean testRecord = org.IsSandbox || Test.isRunningTest();
         
-        String nomeServiceRequest = 'ApiComprovei';
+        // Nome Recurso Estático 
+        String nomeServiceRequest = 'ApiComprovei'; 
         
+        // Valida se é SandBox
         if (testRecord) {
-            nomeServiceRequest += '_Sandbox';
+            nomeServiceRequest += '_Sandbox'; 
         }
-        ServiceRequest__mdt serviceRequest = MetadadosDAO.getServiceRequestPorNome(nomeServiceRequest, testRecord);
-        System.debug('SERVICE REQUEST -> '+serviceRequest);
-        
+        ServiceRequest__mdt serviceRequest = MetadadosDAO.getServiceRequestPorNome(nomeServiceRequest, testRecord); // Chamada do metodo com o valor do EndPoint de ServiceRequest
+                
         Order order;
-        if(numPedidoList != null && numPedidoList.size() >0){ // Valida conteúdo da Lista 
+            if(numPedidoList != null && numPedidoList.size() >0){ // Valida conteúdo da Lista 
             string numeroPedido = numPedidoList[0].numeroPedido; // Atribuição conteúdo do parametro do metódo vindo do ChatBot
             order = [SELECT IdSF__c, ChaveComprovei__c, LinkRastreamentoPedido__c 
                      FROM Order 
                      WHERE IdSF__c=:numeroPedido]; // Traz os valores dos campos compativeis ao numero do pedido
-            System.debug('Numero PEDIDO: '+numeroPedido);
         }
-        System.debug(order);
+        
+        // Valida campo ChaveComprovei_c vazio.
+        if (String.isBlank(order.ChaveComprovei__c)) { 
+            GetLinkComproveiResult result = new GetLinkComproveiResult();
+            result.linkTraking = 'Exceção - ChaveComprovei__c está vazio';
+            retornoList.add(result);
+            return retornoList; // Retorna a lista com a exceção e encerra o método
+        }
+        System.debug('QUERY PEDIDO -> '+order);
+
         String API_KEY = '';
         API_KEY = order.ChaveComprovei__c;
         
-		system.debug('CHAVE COMPROVEI -> '+order.ChaveComprovei__c+' API_KEY -> '+API_KEY);
+              
         String endPoint = serviceRequest.Endpoint__c.replace('{ApiKey}', API_KEY);	// Contrução URL COMPROVEI para Metodo GET, com valor do campo ChaveComrpovei__c
-        
-        
-        System.debug('ENDPOINT => '+endPoint);
-        String username = 'userNameTest'; // Usuário e Senhas necessários para acesso dos dados via Metodo 'GET'
+        System.debug('ENDPOINT -> '+endpoint);
+        String username = 'userTest'; // Usuário e Senhas necessários para acesso dos dados via Metodo 'GET'
         String password = 'passwordTest';
         String authHeader = 'Basic ' + EncodingUtil.base64Encode(Blob.valueOf(username + ':' + password)); // Construção do Header de chamada de Usuário e Senha
         
@@ -100,38 +107,37 @@ public with sharing class GetLinkComproveiBO {
         request.setTimeout(120000); // Tempo limite de requsição
         request.setHeader('Authorization', authHeader); // Set Header(user:password) Authorization à requisição
         HttpResponse response = http.send(request);
-        System.debug(response.getBody());
         
-        System.debug(response.getStatusCode());
+        System.debug('RESPONSE BODY ->'+response.getBody());
+        System.debug('RESPONSE STATUS -> '+response.getStatusCode());
         
-        if ((response.getStatusCode() == 200) || (response.getStatusCode() == 201) || (response.getStatusCode() == 202) || (response.getStatusCode() == 203) || (response.getStatusCode() == 204) || 			 
-           (response.getStatusCode() == 205) || (response.getStatusCode() == 206)){
+        String responseBody = response.getBody(); // Atribuição do valor do corpo do JSON a variável responseBody
+        GetLinkComproveiTO comprovei = (GetLinkComproveiTO)JSON.deserialize(responseBody, GetLinkComproveiTO.class); // Deserializa o JSON de responseBody em um Objeto da Classe ComproveiTO.
+
+        if ((response.getStatusCode() == 200) || (response.getStatusCode() == 201) || (response.getStatusCode() == 202) || (response.getStatusCode() == 203) || (response.getStatusCode() == 204) 
+	||(response.getStatusCode() == 205) || (response.getStatusCode() == 206)){
             
-            if(order.ChaveComprovei__c != null){ // Valida conteúdo ChaveComprovei__c 
-                String responseBody = response.getBody(); // Atribuição do valor do corpo do JSON a variável responseBody
-                GetLinkComproveiTO comprovei = (GetLinkComproveiTO)JSON.deserialize(responseBody, GetLinkComproveiTO.class); // Deserializa o JSON de responseBody em um Objeto da Classe ComproveiTO.
+            if(comprovei.user_message != 'Documento não encontrado.'){ // ChaveComprovei incorreta, retorno Codigo.200 de documento não encontrado
+                
                 order.LinkRastreamentoPedido__c = comprovei.response_data[0].Documento.LinkTracking; // Atribuição do valor adquirido do campo LinkTracking proveniênte do JSON do Comprovei. 
                 
                 GetLinkComproveiResult result = new GetLinkComproveiResult(); // Instancia de um objeto da Classe GetLinkComproveiResults.     
                 result.linkTraking = order.LinkRastreamentoPedido__c; // Atribuição à variavel do objeto result, o link de rastreamento adquirido no JSON. 
                 retornoList.add(result); // Adicionando valores a lista que retornará o link de rastreamento adquirido no metodo GET.
+                
             }else{
-                GetLinkComproveiResult retornaErro = new GetLinkComproveiResult(); // Em caso do campo ChaveComprovei__c estiver vazio, uma msg de erro é retornada.
-                retornaErro.linkTraking = 'Chave Comprovei não encontrada. Não foi possivel rastrear o pedido';
-                retornoList.add(retornaErro);
+                GetLinkComproveiResult result = new GetLinkComproveiResult(); // Instancia de um objeto da Classe GetLinkComproveiResults.     
+                result.linkTraking = comprovei.user_message; // Atribuição à variavel do objeto result, o link de rastreamento adquirido no JSON. 
+                retornoList.add(result); // Adicionando valores a lista que retornará o link de rastreamento adquirido no metodo GET.
             }
             
-        }else if(response.getStatusCode() == 400){
-            GetLinkComproveiResult retornaErro = new GetLinkComproveiResult();
-            retornaErro.linkTraking = 'Ocorreu um erro ao tentar acessar o link de Rastreamento'; // Retorno de erro em caso de falha GET url Comprovei
-            retornoList.add(retornaErro);
         }
+        
         return retornoList; // retorna o valor do Link de Rastreamento ao ChatBot. 
         
     }
     
 }
-
 --------------------------------------------------------------------------------------------\\----------------------------------------------------------------------------------------------------------------------
 public class ComproveiTO {
     
@@ -186,9 +192,146 @@ public class ComproveiTO {
         public String LinkTracking;
     }
 }
+--------------------------------------------------------------------------------------------\\----------------------------------------------------------------------------------------------------------------------
+@isTest
+public class GetLinkComproveiBOTest {
 
+    @isTest
+    public static void getLinkComprovei_PositiveTest(){
+               
+        // Criação de registros de teste
+        Account acc = new Account(
+            Name = 'Account-1',
+            Phone = '(11) 3578-0800',
+            PaisOrigem__c = 'UY',
+            CodigoCliente__c = '789654',
+            LojaCliente__c = '12'
+        );
+        insert acc;
+        
+        Order pedido = new Order(
+            EffectiveDate = System.today(),
+            IdSF__c = 'o670299',
+            AccountId = acc.Id,
+            Status = 'F',
+            ChaveComprovei__c = '432305038538960059665520000019760' // true value
+            
+        );   
+        insert pedido;
+        
+        // Chamada Recurso Estático corresponde ao codigo da ação; Codigo.200 Documento não encontrado
+        StaticResourceCalloutMock mockResponse = new StaticResourceCalloutMock();
+        mockResponse.setStaticResource('MockComproveiResponseDocFind'); 
+        mockResponse.setStatusCode(200);
+        Test.setMock(HttpCalloutMock.class, mockResponse);
+
+        Test.startTest();
+        // Atribuição do valor do Pedido do parametro do metodo criaLinkRastreamentoComprovei
+        List<GetLinkComproveiRequest> requestList = new List<GetLinkComproveiRequest>();
+        GetLinkComproveiRequest request = new GetLinkComproveiRequest();
+        request.numeroPedido = pedido.IdSF__c; 
+        requestList.add(request);
+
+        // Teste da classe GetLinkComproveiBO
+        List<GetLinkComproveiResult> resultList = GetLinkComproveiBO.criaLinkRastreamentoComprovei(requestList);
+
+        Test.stopTest();
+        
+        // Verificações
+        System.assertEquals(1, resultList.size());
+        System.assertEquals('https://tracking.comprovei.com/#/track/ylef6ufieSpiegi', resultList[0].linkTraking);
+        
+    }
+
+ @isTest
+    public static void getLinkComprovei_NegativeTestCode200(){
+        
+        // Chamada Recurso Estático corresponde ao codigo da ação; Codigo.200 Documento não encontrado
+        StaticResourceCalloutMock mockResponse = new StaticResourceCalloutMock();
+        mockResponse.setStaticResource('MockComproveiResponseDocNotFind');
+        mockResponse.setStatusCode(200);
+        Test.setMock(HttpCalloutMock.class, mockResponse);
+        
+        // Criação de registros de teste
+        Account acc = new Account(
+            Name = 'Account-1',
+            Phone = '(11) 3578-0800',
+            PaisOrigem__c = 'UY',
+            CodigoCliente__c = '789654',
+            LojaCliente__c = '12'
+        );
+        insert acc;
+        
+        Order pedido = new Order(
+            EffectiveDate = System.today(),
+            IdSF__c = 'o670299',
+            AccountId = acc.Id,
+            Status = 'F',
+            ChaveComprovei__c = '123331312aasa2331' // false/wrong value
+            
+        );   
+        
+        // Atribuição do valor do Pedido do parametro do metodo criaLinkRastreamentoComprovei
+        List<GetLinkComproveiRequest> requestList = new List<GetLinkComproveiRequest>();
+        GetLinkComproveiRequest request = new GetLinkComproveiRequest();
+        insert pedido;
+        request.numeroPedido = pedido.IdSF__c;
+        requestList.add(request);
+
+        // Teste da classe GetLinkComproveiBO
+        Test.startTest();
+       
+        List<GetLinkComproveiResult> resultList = GetLinkComproveiBO.criaLinkRastreamentoComprovei(requestList);
+       
+        // Verificações
+        System.assertEquals(1, resultList.size());
+        System.assertEquals('Documento não encontrado.', resultList[0].linkTraking);
+        
+        Test.stopTest();
+        
+  }
+    @isTest
+    public static void getLinkComprovei_ChaveComproveiIsBlank(){
+  
+        // Criação de registros de teste
+        Account acc = new Account(
+            Name = 'Account-1',
+            Phone = '(11) 3578-0800',
+            PaisOrigem__c = 'UY',
+            CodigoCliente__c = '789654',
+            LojaCliente__c = '12'
+        );
+        insert acc;
+        
+        Order pedido = new Order(
+            EffectiveDate = System.today(),
+            IdSF__c = 'o670299',
+            AccountId = acc.Id,
+            Status = 'F'
+	    // ChaveComprovei__c vazio 
+        );   
+        
+        // Atribuição do valor do Pedido do parametro do metodo criaLinkRastreamentoComprovei
+        List<GetLinkComproveiRequest> requestList = new List<GetLinkComproveiRequest>();
+        GetLinkComproveiRequest request = new GetLinkComproveiRequest();
+        insert pedido;
+        request.numeroPedido = pedido.IdSF__c;
+        requestList.add(request);
+
+        // Teste da classe GetLinkComproveiBO
+        Test.startTest();
+       
+        List<GetLinkComproveiResult> resultList = GetLinkComproveiBO.criaLinkRastreamentoComprovei(requestList);
+       
+        // Verificações
+        System.assertEquals(1, resultList.size());
+        System.assertEquals('Exceção - ChaveComprovei__c está vazio', resultList[0].linkTraking);
+        
+        Test.stopTest();
+        
+	}
+}
 ```
-
 # POST METHOD
 ```
 global with sharing class LeadInsertWrapper {  // usando WorkBench
