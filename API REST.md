@@ -60,7 +60,7 @@ public with sharing class GetLinkComproveiBO {
         // Lista que retornará a URL de rastreamento do Comprovei.
         List<GetLinkComproveiResult> retornoList = new List<GetLinkComproveiResult>(); 
         
-        // Retorna tipo Org
+        // Retorna valores do tipo da organização do obj Organization
         Organization org = [SELECT Id, IsSandbox FROM Organization LIMIT 1];
         Boolean testRecord = org.IsSandbox || Test.isRunningTest();
         
@@ -71,33 +71,36 @@ public with sharing class GetLinkComproveiBO {
         if (testRecord) {
             nomeServiceRequest += '_Sandbox'; 
         }
-        ServiceRequest__mdt serviceRequest = MetadadosDAO.getServiceRequestPorNome(nomeServiceRequest, testRecord); // Chamada do metodo com o valor do EndPoint de ServiceRequest
-                
-        Order order;
-            if(numPedidoList != null && numPedidoList.size() >0){ // Valida conteúdo da Lista 
-            string numeroPedido = numPedidoList[0].numeroPedido; // Atribuição conteúdo do parametro do metódo vindo do ChatBot
-            order = [SELECT IdSF__c, ChaveComprovei__c, LinkRastreamentoPedido__c 
+
+		List<ServiceRequest__mdt> serviceRequestList = new List<ServiceRequest__mdt>();
+        serviceRequestList.add(ServiceRequest__mdt.getInstance(nomeServiceRequest));
+             
+        System.debug('SERVICE REQUEST >>'+ serviceRequestList[0]);
+        
+        Order order = new Order();
+        if(numPedidoList != null && numPedidoList.size() >0){ // Valida conteúdo da Lista 
+            String numeroPedido = numPedidoList[0].numeroPedido; // Atribuição conteúdo do parametro do metódo vindo do ChatBot
+            order = [SELECT IdSF__c, ChaveNF__c, LinkRastreamentoPedido__c 
                      FROM Order 
                      WHERE IdSF__c=:numeroPedido]; // Traz os valores dos campos compativeis ao numero do pedido
         }
-        
+
         // Valida campo ChaveComprovei_c vazio.
-        if (String.isBlank(order.ChaveComprovei__c)) { 
+        if (String.isBlank(order.ChaveNF__c)) { 
             GetLinkComproveiResult result = new GetLinkComproveiResult();
-            result.linkTraking = 'Exceção - ChaveComprovei__c está vazio';
+            result.linkTraking = 'Exceção - ChaveNF__c está vazio';
             retornoList.add(result);
             return retornoList; // Retorna a lista com a exceção e encerra o método
         }
         System.debug('QUERY PEDIDO -> '+order);
 
         String API_KEY = '';
-        API_KEY = order.ChaveComprovei__c;
-        
+        API_KEY = order.ChaveNF__c;
               
-        String endPoint = serviceRequest.Endpoint__c.replace('{ApiKey}', API_KEY);	// Contrução URL COMPROVEI para Metodo GET, com valor do campo ChaveComrpovei__c
+        String endPoint = serviceRequestList[0].Endpoint__c.replace('{ApiKey}', API_KEY);	// Contrução URL COMPROVEI para Metodo GET, com valor do campo ChaveComrpovei__c
         System.debug('ENDPOINT -> '+endpoint);
-        String username = 'userTest'; // Usuário e Senhas necessários para acesso dos dados via Metodo 'GET'
-        String password = 'passwordTest';
+        String username = System.Label.UserNameComprovei; // Rótulo personalizado
+        String password = System.Label.PasswordComprovei; // Rótulo personalizado
         String authHeader = 'Basic ' + EncodingUtil.base64Encode(Blob.valueOf(username + ':' + password)); // Construção do Header de chamada de Usuário e Senha
         
         Http http = new Http();
@@ -114,8 +117,7 @@ public with sharing class GetLinkComproveiBO {
         String responseBody = response.getBody(); // Atribuição do valor do corpo do JSON a variável responseBody
         GetLinkComproveiTO comprovei = (GetLinkComproveiTO)JSON.deserialize(responseBody, GetLinkComproveiTO.class); // Deserializa o JSON de responseBody em um Objeto da Classe ComproveiTO.
 
-        if ((response.getStatusCode() == 200) || (response.getStatusCode() == 201) || (response.getStatusCode() == 202) || (response.getStatusCode() == 203) || (response.getStatusCode() == 204) 
-	||(response.getStatusCode() == 205) || (response.getStatusCode() == 206)){
+        if ((response.getStatusCode() == 200) || (response.getStatusCode() == 201) || (response.getStatusCode() == 202) || (response.getStatusCode() == 203) || (response.getStatusCode() == 204) || (response.getStatusCode() == 205) || (response.getStatusCode() == 206)){
             
             if(comprovei.user_message != 'Documento não encontrado.'){ // ChaveComprovei incorreta, retorno Codigo.200 de documento não encontrado
                 
@@ -132,7 +134,6 @@ public with sharing class GetLinkComproveiBO {
             }
             
         }
-        
         return retornoList; // retorna o valor do Link de Rastreamento ao ChatBot. 
         
     }
