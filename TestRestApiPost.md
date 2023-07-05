@@ -22,9 +22,9 @@ public class GetTempoMedioDescargaComprovei {
              idList.add(itemAcc.Id);
              
          }
-         Order order = [SELECT Id, AccountId, NumeroRota__c, PlacaVeiculo__c 
-                        FROM Order 
-                        WHERE AccountId IN :idList]; 
+         List<Order> orders = [SELECT Id, AccountId, NumeroRota__c, PlacaVeiculo__c 
+                        	   FROM Order 
+                               WHERE AccountId IN :idList]; 
         
         Date today = System.today();
 		Datetime todayDatetime = Datetime.newInstance(today.year(), today.month(), today.day());
@@ -33,8 +33,8 @@ public class GetTempoMedioDescargaComprovei {
         GetTempoMedioDescargaComproveiTO.Filtros filtros = new GetTempoMedioDescargaComproveiTO.Filtros();
         filtros.data_inicial =  '2015-01-01';
         filtros.data_final =    todayString;
-        filtros.placa_veiculo = new List<String>{'String', order.PlacaVeiculo__c};
-        filtros.numero_rota = new List<String>{'int', order.NumeroRota__c};
+        filtros.placa_veiculo = new List<String>{'String', orders.PlacaVeiculo__c};
+        filtros.numero_rota = new List<String>{'int', orders.NumeroRota__c};
         
         List<String> camposList = new List<String>{
            'Rota',
