@@ -33,3 +33,29 @@ IF(MONTH({!DatadeEntrega}) < 10,
 )
 
 ```
+
+#### Formula Farol
+```
+Tipo de dados	Fórmula	 	 
+IF(
+  AND(ISPICKVAL(Status__c, 'Em aberto'), DiasAberto__c <= 1),
+  IMAGE("/img/samples/color_green.gif", "OK", 15,15),
+    IF(
+      AND(ISPICKVAL(Status__c, 'Em aberto'), DiasAberto__c = 2),
+      IMAGE("/img/samples/color_yellow.gif", "Alerta", 15,15),
+        IF(
+          AND(ISPICKVAL(Status__c, 'Em aberto'), DiasAberto__c >= 3),
+          IMAGE("/img/samples/color_red.gif", "NOK", 15,15),
+            IF(
+              ISPICKVAL(Status__c, 'Aprovado'),
+              IMAGE("/img/samples/flag_green.gif", "APROVADO!", 15,15),
+              IF(
+                  ISPICKVAL(Status__c, 'Rejeitado'),
+                  IMAGE("/img/samples/flag_red.gif", "REJEITADO!", 15,15),
+               NULL
+              )
+            )
+          )
+        )
+    )
+```
