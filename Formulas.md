@@ -59,3 +59,13 @@ IF(
         )
     )
 ```
+### Formula Aproval Process
+```
+AND(OR(Conta__r.BusinessUnit__c  = 'Atacado',
+       Conta__r.BusinessUnit__c  = 'Industrial'), 
+    OR(NOT(ISPICKVAL(Tipo__c, "type_01")),
+       NOT(ISPICKVAL(Tipo__c, "type_02"))
+      )
+    )
+
+```
