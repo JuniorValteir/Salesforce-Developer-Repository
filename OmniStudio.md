@@ -1,3 +1,4 @@
+### Get Result From Integration Procedure OmniStudio
 ```
 global class GetPortabilityWindows implements vlocity_cmt.VlocityOpenInterface {
     public Boolean invokeMethod(String methodName, Map<String, Object> input, Map<String, Object> outMap, Map<String, Object> options) {
